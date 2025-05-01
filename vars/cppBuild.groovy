@@ -14,7 +14,7 @@ def call(Map config = [:], Closure body) {
             path = "${buildDir}/${artifactPattern}"
         }
         //handle relative paths
-        if (artifactPattern.startsWith('.')){
+        if (artifactPattern.startsWith('.')) {
             path = artifactPattern
         }
         return path
@@ -30,17 +30,17 @@ def call(Map config = [:], Closure body) {
         }
 
         stage('Build') {
-            dir('.') {  // Changed to the root of the project. CMakeLists.txt should be here.
+            dir('.') {
                 // Configure and build with CMake.
                 bat "${cmakeCommand}"
-                bat "cmake --build ${buildDir} --config ${buildType}" // Use the buildDir
+                bat "cmake --build ${buildDir} --config ${buildType}"
             }
         }
 
         stage('Test') {
             if (runTests) {
                 try {
-                    dir("${buildDir}") { //and here
+                    dir("${buildDir}") {
                         bat 'ctest --verbose'
                     }
                 } catch (Exception e) {
@@ -55,17 +55,18 @@ def call(Map config = [:], Closure body) {
         stage('Package Artifact') {
             // Package the main executable
             def artifactPath = getArtifactPath()
-            echo "Archiving artifact: ${artifactPath}"  // Print the artifact path
-            bat "dir ${buildDir}" // Debug: List files in the build directory
+            echo "Archiving artifact: ${artifactPath}"
+            bat "dir ${buildDir}" // Debug
             try {
-              archiveArtifacts artifacts: artifactPath
+                archiveArtifacts artifacts: artifactPath
             } catch (Exception e) {
-              echo "Error archiving artifacts: ${e.message}"
-              currentBuild.result = 'FAILURE'
-              error "Artifact archiving failed"
+                echo "Error archiving artifacts: ${e.message}"
+                currentBuild.result = 'FAILURE'
+                error "Artifact archiving failed"
             }
         }
 
+        // Execute the closure.  This is where the 'createArtifact' call happens.
         body()
     }
 }
