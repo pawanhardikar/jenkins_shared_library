@@ -18,10 +18,12 @@ def call(Map config = [:], Closure body) {
 
         stage('Build') {
             dir('.') {  // Create and enter the 'build' directory
-                // Configure and build with CMake in a single command.
-                bat "${cmakeCommand} -- -j" //Use -- to pass arguments to the native build tool
+                // Configure and build with CMake.
+                bat "${cmakeCommand}"
+                bat "cmake --build build --config ${buildType}"
             }
         }
+
 
         stage('Test') {
             if (runTests) {
