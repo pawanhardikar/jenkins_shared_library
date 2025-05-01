@@ -9,11 +9,13 @@ def call(Map config = [:], Closure body) {
 
     // Helper function to get artifact path
     def getArtifactPath = { ->
-        def path
-        if (artifactPattern.contains('/')) {
+        def path = artifactPattern
+        if (!artifactPattern.contains('/')) {
+            path = "${buildDir}/${artifactPattern}"
+        }
+        //handle relative paths
+        if (artifactPattern.startsWith('.')){
             path = artifactPattern
-        } else {
-          path = "${buildDir}/${artifactPattern}"
         }
         return path
     }
