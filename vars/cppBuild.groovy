@@ -2,10 +2,9 @@
 def call(Map config = [:], Closure body) {
     // Default values for the configuration
     def buildType = config.buildType ?: 'Release'
-    def cmakeCommand = config.cmakeCommand ?: 'cmake ..'
-    def makeCommand = config.makeCommand ?: 'make'
+    def cmakeCommand = config.cmakeCommand ?: 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=${buildType}'
     def runTests = config.runTests ?: true
-    def artifactPath = config.artifactPath ?: 'build/my_app'
+    def artifactPattern = config.artifactPattern ?: 'build/bin/my_app' // Renamed and defaulted to a more specific path
 
     // Example of using a closure for a block of steps
     body.resolveStrategy = Closure.DELEGATE_FIRST  // Important for using Jenkins DSL within the closure
@@ -17,13 +16,12 @@ def call(Map config = [:], Closure body) {
         }
 
         stage('Build') {
-            dir('.') {  // Create and enter the 'build' directory
+            dir('.') {  // Changed to the root of the project. CMakeLists.txt should be here.
                 // Configure and build with CMake.
                 bat "${cmakeCommand}"
                 bat "cmake --build build --config ${buildType}"
             }
         }
-
 
         stage('Test') {
             if (runTests) {
@@ -34,7 +32,6 @@ def call(Map config = [:], Closure body) {
                 } catch (Exception e) {
                     //test failures should not stop the pipeline
                     echo "Tests Failed, check the logs"
-
                 }
             } else {
                 echo "Skipping tests."
