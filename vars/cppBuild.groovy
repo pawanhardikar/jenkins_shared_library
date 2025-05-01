@@ -4,7 +4,8 @@ def call(Map config = [:], Closure body) {
     def buildType = config.buildType ?: 'Release'
     def cmakeCommand = config.cmakeCommand ?: 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=${buildType}'
     def runTests = config.runTests ?: true
-    def artifactPattern = config.artifactPattern ?: 'build/bin/my_app' // Renamed and defaulted to a more specific path
+    def artifactPattern = config.artifactPattern ?: 'build/bin/my_app' // Default artifact pattern
+    def buildDir = config.buildDir ?: 'build' //added build directory parameter
 
     // Example of using a closure for a block of steps
     body.resolveStrategy = Closure.DELEGATE_FIRST  // Important for using Jenkins DSL within the closure
@@ -19,14 +20,14 @@ def call(Map config = [:], Closure body) {
             dir('.') {  // Changed to the root of the project. CMakeLists.txt should be here.
                 // Configure and build with CMake.
                 bat "${cmakeCommand}"
-                bat "cmake --build build --config ${buildType}"
+                bat "cmake --build ${buildDir} --config ${buildType}" // Use the buildDir
             }
         }
 
         stage('Test') {
             if (runTests) {
                 try {
-                    dir('build') {
+                    dir("${buildDir}") { //and here
                         bat 'ctest --verbose'
                     }
                 } catch (Exception e) {
@@ -40,7 +41,7 @@ def call(Map config = [:], Closure body) {
 
         stage('Package Artifact') {
             // Package the main executable
-            archiveArtifacts artifacts: artifactPattern
+            archiveArtifacts artifacts: "${buildDir}/bin/my_app" // Use the buildDir
         }
 
         body()
