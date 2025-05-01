@@ -18,13 +18,8 @@ def call(Map config = [:], Closure body) {
 
         stage('Build') {
             dir('.') {  // Create and enter the 'build' directory
-                bat "${cmakeCommand} -DCMAKE_BUILD_TYPE=${buildType}"
-                if (isUnix()) {
-                    sh "${makeCommand}"
-                }
-                else {
-                    bat "mingw32-make" // Or nmake if you are using Visual Studio
-                }
+                // Configure and build with CMake in a single command.
+                bat "${cmakeCommand} -- -j" //Use -- to pass arguments to the native build tool
             }
         }
 
