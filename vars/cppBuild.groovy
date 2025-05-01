@@ -18,8 +18,8 @@ def call(Map config = [:], Closure body) {
 
         stage('Build') {
             dir('build') {  // Create and enter the 'build' directory
-                sh "${cmakeCommand} -DCMAKE_BUILD_TYPE=${buildType}"
-                sh "${makeCommand}"
+                bat "${cmakeCommand} -DCMAKE_BUILD_TYPE=${buildType}"
+                bat "${makeCommand}"
             }
         }
 
@@ -27,11 +27,12 @@ def call(Map config = [:], Closure body) {
             if (runTests) {
                 try {
                     dir('build') {
-                        sh 'ctest --verbose'
+                        bat 'ctest --verbose'
                     }
                 } catch (Exception e) {
                     //test failures should not stop the pipeline
                     echo "Tests Failed, check the logs"
+
                 }
             } else {
                 echo "Skipping tests."
@@ -43,13 +44,12 @@ def call(Map config = [:], Closure body) {
             archiveArtifacts artifacts: artifactPath
         }
 
-        // Execute the closure provided by the pipeline
-        body() // Execute the closure
+        body()
     }
 }
 
 def createArtifact(String name, String type) {
     echo "Creating artifact: Name: ${name}, Type: ${type}"
     // In real scenario, we can create a file here
-    sh "touch ${name}.${type}"
+    bat "echo Creating ${name}.${type}"
 }
