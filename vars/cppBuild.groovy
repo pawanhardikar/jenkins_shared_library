@@ -43,7 +43,7 @@ def call(Map config = [:], Closure body) {
 
         stage('Package Artifact') {
             // Package the main executable
-            archiveArtifacts artifacts: "${artifactPattern}" // Use artifactPattern
+            archiveArtifacts artifacts: artifactPattern
         }
 
         body()
