@@ -5,7 +5,18 @@ def call(Map config = [:], Closure body) {
     def cmakeCommand = config.cmakeCommand ?: 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=${buildType}'
     def runTests = config.runTests ?: true
     def artifactPattern = config.artifactPattern ?: 'build/bin/my_app' // Default artifact pattern
-    def buildDir = config.buildDir ?: 'build' //added build directory parameter
+    def buildDir = config.buildDir ?: 'build' // Added build directory parameter
+
+    // Helper function to get artifact path
+    def getArtifactPath = { ->
+        def path
+        if (artifactPattern.contains('/')) {
+            path = artifactPattern
+        } else {
+          path = "${buildDir}/${artifactPattern}"
+        }
+        return path
+    }
 
     // Example of using a closure for a block of steps
     body.resolveStrategy = Closure.DELEGATE_FIRST  // Important for using Jenkins DSL within the closure
@@ -41,7 +52,15 @@ def call(Map config = [:], Closure body) {
 
         stage('Package Artifact') {
             // Package the main executable
-            archiveArtifacts artifacts: "${buildDir}/bin/my_app" // Use the buildDir
+            def artifactPath = getArtifactPath()
+            echo "Archiving artifact: ${artifactPath}"  // Print the artifact path
+            try {
+              archiveArtifacts artifacts: artifactPath
+            } catch (Exception e) {
+              echo "Error archiving artifacts: ${e.message}"
+              currentBuild.result = 'FAILURE'
+              error "Artifact archiving failed"
+            }
         }
 
         body()
