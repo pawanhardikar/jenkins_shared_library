@@ -56,6 +56,8 @@ def call(Map config = [:], Closure body) {
             // Package the main executable
             def artifactPath = getArtifactPath()
             echo "Archiving artifact: ${artifactPath}"  // Print the artifact path
+            // Debug: List files in the build directory
+            bat "dir ${buildDir}"
             try {
               archiveArtifacts artifacts: artifactPath
             } catch (Exception e) {
