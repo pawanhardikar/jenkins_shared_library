@@ -17,7 +17,7 @@ def call(Map config = [:], Closure body) {
         }
 
         stage('Build') {
-            dir('build') {  // Create and enter the 'build' directory
+            dir('.') {  // Create and enter the 'build' directory
                 bat "${cmakeCommand} -DCMAKE_BUILD_TYPE=${buildType}"
                 bat "${makeCommand}"
             }
